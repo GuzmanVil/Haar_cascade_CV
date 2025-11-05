@@ -1,103 +1,49 @@
-# main.py
-import os
-import random
+from src.load_dataset import load_annotations, generate_samples_in_memory
+from src.haar_features import extract_features
+from src.train_model import train_model
 import numpy as np
-import cv2
 
-from src.data_loader import load_annotations, load_image
-from src.integral_image import compute_integral_image
-from src.haar_features import generate_haar_features, evaluate_feature_on_window
-from src.adaboost import AdaBoost
+# === 1. Cargar dataset ===
+mat_path = "dataset/train/wider_face_train.mat"
+images_base_path = "dataset/train/images"
+annotations = load_annotations(mat_path, images_base_path)
 
+val_mat_path = "dataset/val/wider_face_val.mat"
+val_images_base_path = "dataset/val/images"
+val_annotations = load_annotations(val_mat_path, val_images_base_path)
 
-def extract_window(img, bbox, size=(24, 24)):
-    """Recorta y normaliza una ventana 24x24 centrada en una cara."""
-    x, y, w, h = bbox
-    face = img[int(y):int(y+h), int(x):int(x+w)]
-    if face.size == 0:
-        return None
-    return cv2.resize(face, size)
+win_size = (24, 24)
 
+# === 2. Generar muestras ===
 
-def create_training_samples(annotations, n_pos=20, n_neg=20):
-    """
-    Crea ejemplos de entrenamiento: ventanas de caras (positivas)
-    y ventanas aleatorias del fondo (negativas).
-    """
-    pos_samples, neg_samples = [], []
+positives, negatives = generate_samples_in_memory(
+    annotations,
+    img_size=win_size,
+    neg_per_img=10  # limitá según tu RAM
+)
 
-    img_paths = list(annotations.keys())
-    random.shuffle(img_paths)
+print("Positivos:", positives.shape, "Negativos:", negatives.shape)
 
-    for path in img_paths[:n_pos]:
-        img = load_image(path)
-        for bbox in annotations[path]:
-            for (x, y, w, h) in bbox:
-                face = extract_window(img, (x, y, w, h))
-                if face is not None:
-                    pos_samples.append(face)
-                    break  # usar solo una cara por imagen
-            if len(pos_samples) >= n_pos:
-                break
+test_pos, test_neg = generate_samples_in_memory(
+    val_annotations,
+    img_size=win_size,
+    neg_per_img=10  # limitá según tu RAM
+)
 
-    # Ventanas negativas (fondo aleatorio)
-    for path in img_paths[:n_neg]:
-        img = load_image(path)
-        H, W = img.shape
-        for _ in range(3):
-            x = random.randint(0, W - 24)
-            y = random.randint(0, H - 24)
-            window = img[y:y+24, x:x+24]
-            if window.shape == (24, 24):
-                neg_samples.append(window)
-            if len(neg_samples) >= n_neg:
-                break
-        if len(neg_samples) >= n_neg:
-            break
+# === 3. Extraer features ===
+print("[INFO] Extrayendo características...")
+X_pos = extract_features(positives)
+print("Shape de X_pos:", X_pos.shape)
+X_neg = extract_features(negatives)
+X_train = np.vstack([X_pos, X_neg])
+y_train = np.array([1]*len(X_pos) + [0]*len(X_neg))
 
-    print(f"Ventanas positivas: {len(pos_samples)}, negativas: {len(neg_samples)}")
-    return pos_samples, neg_samples
+X_test_pos = extract_features(test_pos)
+X_test_neg = extract_features(test_neg)
+X_test = np.vstack([X_test_pos, X_test_neg])
+y_test = np.array([1]*len(X_test_pos) + [0]*len(X_test_neg))
 
 
-def compute_features_for_samples(samples, features):
-    """
-    Calcula los valores de todas las features Haar para cada ventana.
-    Retorna una matriz X de (n_samples x n_features).
-    """
-    X = np.zeros((len(samples), len(features)), dtype=np.float32)
-    for i, sample in enumerate(samples):
-        ii = compute_integral_image(sample)
-        for j, feat in enumerate(features):
-            X[i, j] = evaluate_feature_on_window(ii, feat)
-    return X
-
-
-if __name__ == "__main__":
-    # --- Cargar dataset ---
-    train_mat = "dataset/train/wider_face_train.mat"
-    train_images = "dataset/train/images"
-    annotations = load_annotations(train_mat, train_images)
-    print(f"Total de imágenes con anotaciones (train): {len(annotations)}")
-
-    # --- Crear muestras de entrenamiento ---
-    pos_samples, neg_samples = create_training_samples(annotations, n_pos=200, n_neg=200)
-    samples = pos_samples + neg_samples
-    labels = np.array([1]*len(pos_samples) + [-1]*len(neg_samples))
-
-    # --- Generar features Haar ---
-    features = generate_haar_features(window_size=(24, 24))
-    print(f"Total de features generadas: {len(features)}")
-
-    # --- Calcular valores de features ---
-    X = compute_features_for_samples(samples, features[:500])  # 500 features para test rápido
-    print(f"Matriz X: {X.shape}, etiquetas: {labels.shape}")
-
-    # --- Entrenar AdaBoost ---
-    model = AdaBoost(T=10)
-    model.train(X, labels)
-
-    # --- Evaluar ---
-    preds = model.predict(X)
-    acc = np.mean(preds == labels)
-    print(f"\nPrecisión de entrenamiento (train): {acc*100:.2f}%")
-
+# === 4. Entrenar modelo ===
+print("[INFO] Entrenando modelo...")
+model, scaler = train_model(X_train, y_train, X_test, y_test, win_size=win_size, save_path="haar_adaboost.pkl")
