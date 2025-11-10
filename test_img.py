@@ -10,14 +10,14 @@ window_size = data["win_size"]
 
 # === 2. Cargar imagen a testear ===
 # Cambiá esta ruta por la imagen que quieras probar
-image_path = "dataset\\test\\images\\0--Parade\\0_Parade_marchingband_1_389.jpg"
+image_path = "dataset/test/images/0--Parade/0_Parade_marchingband_1_289.jpg"
 img = cv2.imread(image_path)
 if img is None:
     raise FileNotFoundError(f"No se pudo cargar la imagen: {image_path}")
 
 # === 3. Detectar caras ===
 print("[INFO] Detectando caras...")
-boxes = detect_faces(img, model, scaler, win_size=window_size[0], step=10, prob_threshold=0.72, scale_factor=1.2, max_scales=6)
+boxes = detect_faces(img, model, scaler, win_size=window_size[0], step=10, prob_threshold=0.7, scale_factor=1.2, max_scales=6)
 boxes = non_max_suppression(boxes, overlapThresh=0.4)
 print(f"[OK] {len(boxes)} detecciones encontradas")
 
