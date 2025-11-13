@@ -1,2 +1,7 @@
-dataset/
 venv/
+
+src/__pycache__
+
+dataset/test/images
+dataset/train/images
+dataset/val/images
