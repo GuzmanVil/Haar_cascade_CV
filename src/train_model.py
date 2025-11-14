@@ -6,7 +6,7 @@ from sklearn.feature_selection import SelectFromModel
 import joblib
 import numpy as np
 
-def train_cascade(X_train, y_train, X_val, y_val, win_size=(24, 24), num_stages=3, save_path="haar_cascade.pkl"):
+def train_cascade(X_train, y_train, X_val, y_val, win_size=(24, 24), num_stages=5, save_path="haar_cascade.pkl"):
     """
     Entrena una cascada de clasificadores AdaBoost secuenciales.
     Cada etapa filtra los falsos positivos de la anterior.
