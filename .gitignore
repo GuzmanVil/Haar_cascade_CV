@@ -1,5 +1,7 @@
 venv/
 
+cache/
+
 src/__pycache__
 
 dataset/test/images
