@@ -25,7 +25,7 @@ def train_cascade(X_train, y_train, X_val, y_val, win_size=(24, 24), num_stages=
         weak = DecisionTreeClassifier(max_depth=1, random_state=42)
         model = AdaBoostClassifier(
             estimator=weak,
-            n_estimators=80 + stage * 40,   # cada etapa un poco más compleja
+            n_estimators=80 + stage * 20,   # cada etapa un poco más compleja
             learning_rate=0.5,
             random_state=42
         )
@@ -71,7 +71,7 @@ def train_cascade(X_train, y_train, X_val, y_val, win_size=(24, 24), num_stages=
         cascada.append({
             "model": model,
             "selector": selector,
-            "threshold": 0.7 + stage * 0.05  # umbral progresivo
+            "threshold": 0.5 + stage * 0.05  # umbral progresivo
         })
 
     # === Guardar cascada completa ===
