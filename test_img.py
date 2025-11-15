@@ -5,7 +5,7 @@ import joblib
 from src.detect_faces import detect_faces, non_max_suppression
 
 # === 1. Cargar modelo entrenado ===
-data = joblib.load("haar_cascade.pkl")
+data = joblib.load("haar_cascade_bigger_threshold.pkl")
 cascade = data["cascade"]
 scaler = data["scaler"]
 
@@ -18,7 +18,7 @@ print(f"[INFO] Tamaño de ventana: {win_size}x{win_size}")
 print(f"[INFO] Etapas en cascada: {len(cascade)}")
 
 # === 2. Cargar imagen a testear ===
-image_path = "dataset/test/images/11--Meeting/11_Meeting_Meeting_11_Meeting_Meeting_11_202.jpg"  # Cambiar por la ruta de tu imagen
+image_path = "dataset/test/images/1--Handshaking/1_Handshaking_Handshaking_1_177.jpg"  # Cambiar por la ruta de tu imagen
 print(f"[INFO] Procesando imagen: {image_path}")
 img = cv2.imread(image_path)
 if img is None:
@@ -30,7 +30,7 @@ boxes = detect_faces(
     img, cascade, scaler,
     win_size=win_size,
     step=20,                
-    scale_factor=1.2,    
+    scale_factor=2,    
     max_scales=5          
 )
 

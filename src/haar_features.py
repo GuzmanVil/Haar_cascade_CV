@@ -22,8 +22,8 @@ def compute_haar_features(ii, win_size=24, step=4):
     feats = []
     H, W = win_size, win_size
 
-    for w in range(8, win_size + 1, 4):
-        for h in range(8, win_size + 1, 4):
+    for w in range(12, win_size + 1, 8):
+        for h in range(12, win_size + 1, 8):
             for x in range(0, max(1, W - w + 1), step):
                 for y in range(0, max(1, H - h + 1), step):
                     mid_w = w // 2
@@ -43,6 +43,13 @@ def compute_haar_features(ii, win_size=24, step=4):
                         a = rect_sum(ii, x, y, third_w, h)
                         b = rect_sum(ii, x + third_w, y, third_w, h)
                         c = rect_sum(ii, x + 2 * third_w, y, third_w, h)
+                        feats.append(a - b + c)
+
+                    third_h = h // 3
+                    if third_h > 0 and y + 3 * third_h <= H:
+                        a = rect_sum(ii, x, y, w, third_h)
+                        b = rect_sum(ii, x, y + third_h, w, third_h)
+                        c = rect_sum(ii, x, y + 2 * third_h, w, third_h)
                         feats.append(a - b + c)
 
                     half_w = w // 2

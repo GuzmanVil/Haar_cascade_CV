@@ -6,7 +6,7 @@ from sklearn.feature_selection import SelectFromModel
 import joblib
 import numpy as np
 
-def train_cascade(X_train, y_train, X_val, y_val, win_size=(24, 24), num_stages=3, save_path="haar_cascade.pkl"):
+def train_cascade(X_train, y_train, X_val, y_val, win_size=(24, 24), num_stages=5, save_path="haar_cascade.pkl"):
     """
     Entrena una cascada de clasificadores AdaBoost secuenciales.
     Cada etapa filtra los falsos positivos de la anterior.
@@ -25,7 +25,7 @@ def train_cascade(X_train, y_train, X_val, y_val, win_size=(24, 24), num_stages=
         weak = DecisionTreeClassifier(max_depth=1, random_state=42)
         model = AdaBoostClassifier(
             estimator=weak,
-            n_estimators=80 + stage * 40,   # cada etapa un poco más compleja
+            n_estimators=80 + stage * 20,   # cada etapa un poco más compleja
             learning_rate=0.5,
             random_state=42
         )
@@ -46,7 +46,7 @@ def train_cascade(X_train, y_train, X_val, y_val, win_size=(24, 24), num_stages=
         weak = DecisionTreeClassifier(max_depth=1, random_state=42)
         model = AdaBoostClassifier(
             estimator=weak,
-            n_estimators=80 + stage * 40,
+            n_estimators=80 + stage * 20,
             learning_rate=0.5,
             random_state=42
         )

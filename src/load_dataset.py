@@ -55,7 +55,7 @@ def generate_samples_in_memory(annotations, img_size=(24, 24), neg_per_img=1, ma
             positives.append(gray)
 
         # NEGATIVOS
-        for _ in range(neg_per_img):
+        for _ in range(max(len(bboxes), neg_per_img)):
             tries = 0
             while tries < 20:
                 nx = random.randint(0, max(0, w - img_size[0]))

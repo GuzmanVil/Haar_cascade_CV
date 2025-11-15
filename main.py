@@ -86,5 +86,5 @@ print("[INFO] Entrenando modelo...")
 cascada, scaler = train_cascade(
     X_train, y_train, X_test, y_test,
     num_stages=4,
-    save_path="haar_cascade.pkl"
+    save_path="haar_cascade_extra_filter.pkl"
 )
