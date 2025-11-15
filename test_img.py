@@ -30,7 +30,7 @@ boxes = detect_faces(
     img, cascade, scaler,
     win_size=win_size,
     step=20,                
-    scale_factor=1.2,    
+    scale_factor=2,    
     max_scales=5          
 )
 

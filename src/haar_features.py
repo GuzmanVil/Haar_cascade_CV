@@ -45,6 +45,13 @@ def compute_haar_features(ii, win_size=24, step=4):
                         c = rect_sum(ii, x + 2 * third_w, y, third_w, h)
                         feats.append(a - b + c)
 
+                    third_h = h // 3
+                    if third_h > 0 and y + 3 * third_h <= H:
+                        a = rect_sum(ii, x, y, w, third_h)
+                        b = rect_sum(ii, x, y + third_h, w, third_h)
+                        c = rect_sum(ii, x, y + 2 * third_h, w, third_h)
+                        feats.append(a - b + c)
+
                     half_w = w // 2
                     half_h = h // 2
                     if half_w > 0 and half_h > 0:

@@ -46,7 +46,7 @@ def train_cascade(X_train, y_train, X_val, y_val, win_size=(24, 24), num_stages=
         weak = DecisionTreeClassifier(max_depth=1, random_state=42)
         model = AdaBoostClassifier(
             estimator=weak,
-            n_estimators=80 + stage * 40,
+            n_estimators=80 + stage * 20,
             learning_rate=0.5,
             random_state=42
         )
